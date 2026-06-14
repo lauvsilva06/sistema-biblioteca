@@ -106,3 +106,5 @@ LOGOUT_REDIRECT_URL = '/'
 
 # Prazo padrão de empréstimo em dias
 PRAZO_EMPRESTIMO_DIAS = 14
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
