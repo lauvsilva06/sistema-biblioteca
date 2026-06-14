@@ -1,0 +1,78 @@
+{% extends "base/public_base.html" %}
+{% block title %}Biblioteca Municipal de Gravatá — Início{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="hero-section">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-7">
+        <p class="hero-eyebrow"><i class="bi bi-geo-alt me-1"></i>Gravatá · Pernambuco</p>
+        <h1>Biblioteca Pública<br>Municipal de Gravatá</h1>
+        <p class="lead">Consulte nosso acervo online. Encontre livros por título, autor ou assunto e descubra o que está disponível para empréstimo.</p>
+        <a href="{% url 'consulta:buscar' %}" class="btn-hero">
+          <i class="bi bi-search"></i>Buscar no Acervo
+        </a>
+      </div>
+      <div class="col-lg-4 offset-lg-1 text-center mt-5 mt-lg-0">
+        <div class="hero-stat-card">
+          <div class="stat-number">{{ total_livros }}</div>
+          <div class="stat-label">obras catalogadas</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ASSUNTOS -->
+{% if assuntos %}
+<section class="container py-5">
+  <h2 class="section-title">Navegue por Assunto</h2>
+  <div class="section-divider"></div>
+  <div class="row g-3">
+    {% for assunto in assuntos %}
+    <div class="col-6 col-md-4 col-lg-3">
+      <a href="{% url 'consulta:buscar' %}?assunto={{ assunto.id }}" class="tag-card">
+        <i class="bi bi-tag-fill"></i>{{ assunto.nome }}
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- DESTAQUES -->
+{% if destaques %}
+<section style="background: var(--creme); border-top: 1px solid var(--borda); border-bottom: 1px solid var(--borda);">
+  <div class="container py-5">
+    <h2 class="section-title">Disponíveis para Empréstimo</h2>
+    <div class="section-divider"></div>
+    <div class="row g-4">
+      {% for livro in destaques %}
+      <div class="col-6 col-md-4 col-lg-2">
+        <div class="livro-card">
+          {% if livro.capa %}
+          <img src="{{ livro.capa.url }}" alt="{{ livro.titulo }}" class="livro-capa">
+          {% else %}
+          <div class="livro-capa-placeholder"><i class="bi bi-book"></i></div>
+          {% endif %}
+          <div class="livro-info">
+            <div class="livro-titulo">{{ livro.titulo|truncatechars:42 }}</div>
+            <div class="livro-autor">{{ livro.autor }}</div>
+            <span class="badge bg-success">{{ livro.exemplares_disponiveis }} disponível</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="text-center mt-4">
+      <a href="{% url 'consulta:buscar' %}" class="btn btn-outline-primary px-4">
+        Ver todo o acervo <i class="bi bi-arrow-right ms-1"></i>
+      </a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}

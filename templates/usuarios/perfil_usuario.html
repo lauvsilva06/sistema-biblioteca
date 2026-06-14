@@ -1,0 +1,119 @@
+{% extends "base/admin_base.html" %}
+{% block title %}{{ perfil.user.get_full_name }} — Perfil{% endblock %}
+
+{% block content %}
+<div class="container px-4 py-4">
+  <a href="{% url 'usuarios:lista_usuarios' %}" class="btn btn-outline-secondary btn-sm mb-4">
+    <i class="bi bi-arrow-left me-1"></i>Voltar
+  </a>
+
+  <div class="row g-4">
+    <!-- SIDEBAR PERFIL -->
+    <div class="col-md-4">
+      <div class="card mb-4">
+        <div class="card-body text-center py-4">
+          <div class="avatar-circle mb-3">
+            {{ perfil.user.first_name|first|upper }}{{ perfil.user.last_name|first|upper }}
+          </div>
+          <h4 style="font-family:'Playfair Display',serif; color:var(--azul);">
+            {{ perfil.user.get_full_name }}
+          </h4>
+          <p class="text-muted small mb-3">@{{ perfil.user.username }}</p>
+          {% if perfil.tem_pendencias %}
+          <div class="alert alert-danger py-2 mb-0">
+            <i class="bi bi-exclamation-triangle me-1"></i>Possui empréstimos atrasados
+          </div>
+          {% else %}
+          <div class="alert alert-success py-2 mb-0">
+            <i class="bi bi-check-circle me-1"></i>Sem pendências
+          </div>
+          {% endif %}
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item"><small class="text-muted d-block">CPF</small><strong>{{ perfil.cpf }}</strong></li>
+          <li class="list-group-item"><small class="text-muted d-block">Telefone</small>{{ perfil.telefone|default:"Não informado" }}</li>
+          <li class="list-group-item"><small class="text-muted d-block">Cadastrado em</small>{{ perfil.data_cadastro|date:"d/m/Y" }}</li>
+          {% if perfil.endereco %}
+          <li class="list-group-item"><small class="text-muted d-block">Endereço</small>{{ perfil.endereco }}</li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="col-md-8">
+      <!-- Empréstimos Ativos -->
+      <div class="card mb-4">
+        <div class="card-header bg-white">
+          <i class="bi bi-book-half me-2" style="color:var(--dourado)"></i>
+          Empréstimos Ativos
+          <span class="badge bg-secondary ms-2">{{ emprestimos_ativos.count }}</span>
+        </div>
+        <div class="card-body p-0">
+          {% if emprestimos_ativos %}
+          <table class="table mb-0">
+            <thead><tr>
+              <th>Livro</th><th>Código</th><th>Devolução</th><th>Status</th><th></th>
+            </tr></thead>
+            <tbody>
+              {% for emp in emprestimos_ativos %}
+              <tr>
+                <td style="color:var(--azul)"><strong>{{ emp.exemplar.livro.titulo|truncatechars:35 }}</strong></td>
+                <td><code>{{ emp.exemplar.codigo }}</code></td>
+                <td>{{ emp.data_prevista|date:"d/m/Y" }}</td>
+                <td>
+                  {% if emp.atrasado %}
+                  <span class="badge bg-danger"><i class="bi bi-clock me-1"></i>{{ emp.dias_atraso }}d atraso</span>
+                  {% else %}
+                  <span class="badge bg-success">No prazo</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <a href="{% url 'emprestimos:registrar_devolucao' emp.pk %}" class="btn btn-sm btn-outline-warning">
+                    Devolver
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <p class="text-muted p-3 mb-0">Nenhum empréstimo ativo no momento.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Histórico -->
+      <div class="card">
+        <div class="card-header bg-white">
+          <i class="bi bi-clock-history me-2" style="color:var(--dourado)"></i>Histórico de Devoluções
+        </div>
+        <div class="card-body p-0">
+          {% if historico %}
+          <table class="table table-sm mb-0">
+            <thead><tr><th>Livro</th><th>Devolvido em</th><th>Status</th></tr></thead>
+            <tbody>
+              {% for emp in historico %}
+              <tr>
+                <td>{{ emp.exemplar.livro.titulo|truncatechars:42 }}</td>
+                <td>{{ emp.data_devolucao|date:"d/m/Y" }}</td>
+                <td>
+                  {% if emp.atrasado %}
+                  <span class="badge bg-warning">Atrasado</span>
+                  {% else %}
+                  <span class="badge bg-success">No prazo</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <p class="text-muted p-3 mb-0">Nenhuma devolução registrada ainda.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

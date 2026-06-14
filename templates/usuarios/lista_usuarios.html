@@ -1,0 +1,65 @@
+{% extends "base/admin_base.html" %}
+{% block title %}Usuários — Biblioteca de Gravatá{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+  <div class="d-flex align-items-start justify-content-between mb-4">
+    <div>
+      <h2 class="section-title mb-0">Usuários Cadastrados</h2>
+      <p class="text-muted small mt-1 mb-0">Leitores e histórico de empréstimos</p>
+    </div>
+    <a href="{% url 'usuarios:cadastrar_usuario' %}" class="btn btn-success">
+      <i class="bi bi-person-plus me-1"></i>Novo Usuário
+    </a>
+  </div>
+
+  <form method="get" class="mb-4">
+    <div class="input-group" style="max-width:420px">
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Buscar por nome ou CPF...">
+      <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+    </div>
+  </form>
+
+  <div class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead><tr class="table-dark">
+            <th>Nome</th><th>CPF</th><th>Telefone</th>
+            <th class="text-center">Situação</th><th class="text-center">Ativos</th><th></th>
+          </tr></thead>
+          <tbody>
+            {% for perfil in page_obj %}
+            <tr>
+              <td>
+                <strong style="color:var(--azul)">{{ perfil.user.get_full_name }}</strong>
+                {% if perfil.user.email %}<br><small class="text-muted">{{ perfil.user.email }}</small>{% endif %}
+              </td>
+              <td><code>{{ perfil.cpf }}</code></td>
+              <td>{{ perfil.telefone|default:"—" }}</td>
+              <td class="text-center">
+                {% if perfil.tem_pendencias %}
+                <span class="badge bg-danger"><i class="bi bi-exclamation-triangle me-1"></i>Pendências</span>
+                {% elif perfil.ativo %}
+                <span class="badge bg-success">Ativo</span>
+                {% else %}
+                <span class="badge bg-secondary">Inativo</span>
+                {% endif %}
+              </td>
+              <td class="text-center">{{ perfil.emprestimos_ativos.count }}</td>
+              <td class="text-end">
+                <a href="{% url 'usuarios:perfil_usuario' perfil.pk %}" class="btn btn-sm btn-outline-primary">
+                  <i class="bi bi-eye me-1"></i>Perfil
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="text-center text-muted py-5">Nenhum usuário encontrado.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

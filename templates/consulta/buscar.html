@@ -1,0 +1,131 @@
+{% extends "base/public_base.html" %}
+{% block title %}Buscar no Acervo — Biblioteca de Gravatá{% endblock %}
+
+{% block content %}
+
+<!-- CABEÇALHO DA BUSCA -->
+<div style="background: var(--azul); border-bottom: 3px solid var(--dourado); padding: 2.5rem 0;">
+  <div class="container">
+    <p class="hero-eyebrow mb-2"><i class="bi bi-search me-1"></i>Consulta ao acervo</p>
+    <h1 style="color: var(--branco); font-size: 1.8rem; margin-bottom: 1.5rem;">Buscar Livros</h1>
+    <form method="get">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <input type="text" name="q" value="{{ q }}" class="form-control form-control-lg"
+            placeholder="Título, autor ou assunto..." style="border-radius:2px;">
+        </div>
+        <div class="col-md-4">
+          <select name="assunto" class="form-select form-select-lg" style="border-radius:2px;">
+            <option value="">Todos os assuntos</option>
+            {% for assunto in assuntos %}
+            <option value="{{ assunto.id }}" {% if assunto_id == assunto.id|stringformat:"s" %}selected{% endif %}>
+              {{ assunto.nome }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-hero w-100" style="height:50px;">Buscar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- RESULTADOS -->
+<div class="container py-5">
+
+  {% if q or assunto_id %}
+  <p class="text-muted mb-4" style="font-size:0.92rem;">
+    <strong style="color:var(--azul)">{{ total }}</strong> resultado(s)
+    {% if q %} para "<em>{{ q }}</em>"{% endif %}
+  </p>
+  {% endif %}
+
+  {% if page_obj %}
+  <div class="row g-4">
+    {% for livro in page_obj %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100" style="transition: box-shadow 0.2s;">
+        <div class="card-body p-4">
+          <h5 style="font-family:'Playfair Display',serif; color:var(--azul); font-size:1rem; margin-bottom:0.3rem;">
+            {{ livro.titulo }}
+          </h5>
+          <p class="text-muted mb-3" style="font-style:italic; font-size:0.88rem;">
+            <i class="bi bi-person me-1"></i>{{ livro.autor }}
+          </p>
+
+          {% if livro.editora %}
+          <p class="small text-muted mb-3">
+            <i class="bi bi-building me-1"></i>{{ livro.editora }}
+            {% if livro.ano_publicacao %}· {{ livro.ano_publicacao }}{% endif %}
+          </p>
+          {% endif %}
+
+          <div class="mb-3">
+            {% for assunto in livro.assuntos.all %}
+            <a href="?assunto={{ assunto.id }}" class="badge text-bg-light me-1 text-decoration-none">
+              {{ assunto.nome }}
+            </a>
+            {% endfor %}
+          </div>
+
+          <div class="d-flex align-items-center gap-2">
+            {% if livro.exemplares_disponiveis > 0 %}
+            <span class="badge bg-success">
+              <i class="bi bi-check-circle me-1"></i>{{ livro.exemplares_disponiveis }} disponível
+            </span>
+            {% else %}
+            <span class="badge bg-secondary">
+              <i class="bi bi-x-circle me-1"></i>Indisponível
+            </span>
+            {% endif %}
+            {% if livro.eh_doacao %}
+            <span class="badge bg-info">
+              <i class="bi bi-heart me-1"></i>Doação
+            </span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if page_obj.has_other_pages %}
+  <nav class="mt-5">
+    <ul class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?q={{ q }}&assunto={{ assunto_id }}&page={{ page_obj.previous_page_number }}">
+          <i class="bi bi-chevron-left"></i> Anterior
+        </a>
+      </li>
+      {% endif %}
+      <li class="page-item active">
+        <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+      </li>
+      {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?q={{ q }}&assunto={{ assunto_id }}&page={{ page_obj.next_page_number }}">
+          Próxima <i class="bi bi-chevron-right"></i>
+        </a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+
+  {% else %}
+  <div class="text-center py-5" style="color: var(--texto-muted);">
+    <i class="bi bi-search" style="font-size: 3.5rem; color: var(--borda);"></i>
+    <h5 style="font-family:'Playfair Display',serif; color:var(--azul); margin-top:1.5rem;">
+      Nenhum livro encontrado
+    </h5>
+    <p class="text-muted">Tente outros termos de busca ou navegue por assunto.</p>
+    <a href="{% url 'consulta:buscar' %}" class="btn btn-outline-primary mt-2">Limpar filtros</a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
