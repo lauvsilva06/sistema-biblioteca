@@ -1,0 +1,60 @@
+{% extends "base/admin_base.html" %}
+{% block title %}Acervo — Biblioteca de Gravatá{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="section-title"><i class="bi bi-journals me-2"></i>Acervo de Livros</h2>
+    <a href="{% url 'acervo:cadastrar_livro' %}" class="btn btn-success"><i class="bi bi-plus-lg me-1"></i>Cadastrar Livro</a>
+  </div>
+
+  <form method="get" class="mb-3">
+    <div class="input-group" style="max-width:400px">
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Buscar por título ou autor...">
+      <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+    </div>
+  </form>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-dark">
+        <tr><th>Título</th><th>Autor</th><th>ISBN</th><th>Exemplares</th><th>Disponíveis</th><th>Ações</th></tr>
+      </thead>
+      <tbody>
+        {% for livro in page_obj %}
+        <tr>
+          <td>
+            <strong>{{ livro.titulo }}</strong>
+            {% if livro.eh_doacao %}<span class="badge bg-info ms-1">Doação</span>{% endif %}
+          </td>
+          <td>{{ livro.autor }}</td>
+          <td><code>{{ livro.isbn|default:"—" }}</code></td>
+          <td>{{ livro.total_exemplares }}</td>
+          <td>
+            {% if livro.exemplares_disponiveis > 0 %}
+            <span class="badge bg-success">{{ livro.exemplares_disponiveis }}</span>
+            {% else %}
+            <span class="badge bg-secondary">0</span>
+            {% endif %}
+          </td>
+          <td class="d-flex gap-1">
+            <a href="{% url 'acervo:detalhe_livro' livro.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
+            <a href="{% url 'acervo:editar_livro' livro.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center text-muted py-4">Nenhum livro encontrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page_obj.has_other_pages %}
+  <nav><ul class="pagination">
+    {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?q={{ q }}&page={{ page_obj.previous_page_number }}">Anterior</a></li>{% endif %}
+    <li class="page-item active"><span class="page-link">{{ page_obj.number }}/{{ page_obj.paginator.num_pages }}</span></li>
+    {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?q={{ q }}&page={{ page_obj.next_page_number }}">Próxima</a></li>{% endif %}
+  </ul></nav>
+  {% endif %}
+</div>
+{% endblock %}

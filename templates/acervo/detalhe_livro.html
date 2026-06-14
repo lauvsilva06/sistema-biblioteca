@@ -1,0 +1,60 @@
+{% extends "base/admin_base.html" %}
+{% block title %}{{ livro.titulo }} — Acervo{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <a href="{% url 'acervo:lista_livros' %}" class="btn btn-outline-secondary btn-sm mb-3"><i class="bi bi-arrow-left me-1"></i>Voltar ao Acervo</a>
+
+  <div class="row">
+    <div class="col-md-4 mb-4">
+      {% if livro.capa %}
+      <img src="{{ livro.capa.url }}" alt="{{ livro.titulo }}" class="img-fluid rounded shadow">
+      {% else %}
+      <div class="capa-placeholder-lg rounded shadow d-flex align-items-center justify-content-center">
+        <i class="bi bi-book display-1 text-muted"></i>
+      </div>
+      {% endif %}
+    </div>
+    <div class="col-md-8">
+      <h2 class="fw-bold">{{ livro.titulo }}</h2>
+      <p class="lead text-muted">{{ livro.autor }}</p>
+      {% if livro.eh_doacao %}<div class="alert alert-info py-2"><i class="bi bi-heart me-1"></i>Doação de: <strong>{{ livro.doador|default:"Anônimo" }}</strong></div>{% endif %}
+
+      <dl class="row mt-3">
+        {% if livro.isbn %}<dt class="col-sm-3">ISBN</dt><dd class="col-sm-9"><code>{{ livro.isbn }}</code></dd>{% endif %}
+        {% if livro.editora %}<dt class="col-sm-3">Editora</dt><dd class="col-sm-9">{{ livro.editora }}</dd>{% endif %}
+        {% if livro.ano_publicacao %}<dt class="col-sm-3">Ano</dt><dd class="col-sm-9">{{ livro.ano_publicacao }}</dd>{% endif %}
+        {% if livro.assuntos.all %}<dt class="col-sm-3">Assuntos</dt><dd class="col-sm-9">{% for a in livro.assuntos.all %}<span class="badge text-bg-light me-1">{{ a.nome }}</span>{% endfor %}</dd>{% endif %}
+        <dt class="col-sm-3">Cadastrado em</dt><dd class="col-sm-9">{{ livro.data_cadastro|date:"d/m/Y" }}</dd>
+      </dl>
+
+      {% if livro.sinopse %}<p>{{ livro.sinopse }}</p>{% endif %}
+
+      <div class="d-flex gap-2 mt-3">
+        <a href="{% url 'acervo:editar_livro' livro.pk %}" class="btn btn-outline-secondary"><i class="bi bi-pencil me-1"></i>Editar</a>
+        <a href="{% url 'acervo:adicionar_exemplar' livro.pk %}" class="btn btn-success"><i class="bi bi-plus-lg me-1"></i>Adicionar Exemplar</a>
+      </div>
+    </div>
+  </div>
+
+  <hr class="my-4">
+  <h4 class="fw-bold mb-3"><i class="bi bi-copy me-2"></i>Exemplares ({{ exemplares.count }})</h4>
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead class="table-light"><tr><th>Código</th><th>Condição</th><th>Adquirido em</th><th>Situação</th></tr></thead>
+      <tbody>
+        {% for ex in exemplares %}
+        <tr>
+          <td><code>{{ ex.codigo }}</code></td>
+          <td>{{ ex.get_condicao_display }}</td>
+          <td>{{ ex.data_aquisicao|date:"d/m/Y" }}</td>
+          <td>{% if ex.disponivel %}<span class="badge bg-success">Disponível</span>{% else %}<span class="badge bg-warning text-dark">Emprestado</span>{% endif %}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="text-muted">Nenhum exemplar cadastrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends "base/admin_base.html" %}
+{% block title %}{{ perfil.user.get_full_name }} — Perfil{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <a href="{% url 'usuarios:lista_usuarios' %}" class="btn btn-outline-secondary btn-sm mb-3"><i class="bi bi-arrow-left me-1"></i>Voltar</a>
+
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body text-center p-4">
+          <div class="avatar-circle mb-3">{{ perfil.user.first_name|first|upper }}{{ perfil.user.last_name|first|upper }}</div>
+          <h4 class="fw-bold">{{ perfil.user.get_full_name }}</h4>
+          <p class="text-muted">@{{ perfil.user.username }}</p>
+          {% if perfil.tem_pendencias %}
+          <div class="alert alert-danger py-2"><i class="bi bi-exclamation-triangle me-1"></i>Possui empréstimos atrasados</div>
+          {% else %}
+          <div class="alert alert-success py-2"><i class="bi bi-check-circle me-1"></i>Sem pendências</div>
+          {% endif %}
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item"><strong>CPF:</strong> {{ perfil.cpf }}</li>
+          <li class="list-group-item"><strong>Telefone:</strong> {{ perfil.telefone|default:"Não informado" }}</li>
+          <li class="list-group-item"><strong>Cadastro:</strong> {{ perfil.data_cadastro|date:"d/m/Y" }}</li>
+          {% if perfil.endereco %}<li class="list-group-item"><strong>Endereço:</strong> {{ perfil.endereco }}</li>{% endif %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="col-md-8">
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white fw-bold"><i class="bi bi-book-half me-2"></i>Empréstimos Ativos ({{ emprestimos_ativos.count }})</div>
+        <div class="card-body p-0">
+          {% if emprestimos_ativos %}
+          <table class="table table-hover mb-0">
+            <thead class="table-light"><tr><th>Livro</th><th>Exemplar</th><th>Devolução prevista</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+              {% for emp in emprestimos_ativos %}
+              <tr>
+                <td>{{ emp.exemplar.livro.titulo|truncatechars:35 }}</td>
+                <td><code>{{ emp.exemplar.codigo }}</code></td>
+                <td>{{ emp.data_prevista|date:"d/m/Y" }}</td>
+                <td>
+                  {% if emp.atrasado %}
+                  <span class="badge bg-danger"><i class="bi bi-clock me-1"></i>{{ emp.dias_atraso }} dia(s) atrasado</span>
+                  {% else %}
+                  <span class="badge bg-success">No prazo</span>
+                  {% endif %}
+                </td>
+                <td><a href="{% url 'emprestimos:registrar_devolucao' emp.pk %}" class="btn btn-sm btn-outline-warning">Devolver</a></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <p class="text-muted p-3 mb-0">Nenhum empréstimo ativo.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-white fw-bold"><i class="bi bi-clock-history me-2"></i>Histórico de Devoluções</div>
+        <div class="card-body p-0">
+          {% if historico %}
+          <table class="table table-sm mb-0">
+            <thead class="table-light"><tr><th>Livro</th><th>Devolvido em</th><th>Status</th></tr></thead>
+            <tbody>
+              {% for emp in historico %}
+              <tr>
+                <td>{{ emp.exemplar.livro.titulo|truncatechars:40 }}</td>
+                <td>{{ emp.data_devolucao|date:"d/m/Y" }}</td>
+                <td>{% if emp.atrasado %}<span class="badge bg-warning text-dark">Atrasado</span>{% else %}<span class="badge bg-success">No prazo</span>{% endif %}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <p class="text-muted p-3 mb-0">Nenhuma devolução registrada.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
